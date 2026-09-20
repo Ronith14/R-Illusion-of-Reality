@@ -1,0 +1,5 @@
+{
+    "efficientnet_weight": 0.2,
+    "dnn_weight": 0.8,
+    "threshold": 0.58
+}
