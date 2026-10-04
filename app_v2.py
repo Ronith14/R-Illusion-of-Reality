@@ -448,7 +448,7 @@ def load_models():
     eff_weight = float(
         get_config_value(
             config,
-            ["BEST_EFF_WEIGHT", "best_eff_weight", "eff_weight"],
+           ["efficientnet_weight", "BEST_EFF_WEIGHT", "best_eff_weight", "eff_weight"],
             0.5,
         )
     )
