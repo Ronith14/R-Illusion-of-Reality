@@ -66,9 +66,9 @@ DRIVE_FILE_ID = "1yGaE_P2-X2LdJxHQ3M7YRfRxd-zIKRtV"
 
 @st.cache_resource
 def load_detection_models():
-    # Ingest V2 Baseline Assets from fixed sub-folders
-    v2_eff = tf.keras.models.load_model("V2_models/efficientnet_v2.keras")
-    v2_dnn = tf.keras.models.load_model("V2_models/dnn_v2.keras")
+    # Ingest V2 Baseline Assets matching your V2_models directory names exactly
+    v2_eff = tf.keras.models.load_model("V2_models/efficientnet_v2_final.keras")
+    v2_dnn = tf.keras.models.load_model("V2_models/dnn_v2_final.keras")
         
     # Ingest V3 Overhaul Assets (Stream base from Drive, load local JSON configurations)
     v3_local_path = "efficientnet_v3_final.keras"
@@ -119,8 +119,8 @@ if uploaded_file is not None:
             v2_resized = tf.image.resize(img_tensor, [256, 256]) 
             v2_batch = tf.expand_dims(v2_resized, axis=0)
             
-            # Robust Layer Target Fetch - Bypasses class logic to eliminate NameErrors
-            v2_gap_layers = [l for l in v2_eff.layers if "pooling" in l.name or "gap" in l.name]
+            # Fixed variable loops from x.name to eliminate NameErrors and typings
+            v2_gap_layers = [x for x in v2_eff.layers if "pooling" in x.name or "gap" in x.name]
             v2_extractor = tf.keras.Model(v2_eff.input, [v2_eff.output, v2_gap_layers[-1].output])
             
             v2_eff_p, v2_features = v2_extractor.predict(v2_batch, verbose=0)
@@ -144,13 +144,12 @@ if uploaded_file is not None:
     with col_v3:
         st.markdown("### ⚡ V3 Fine-Tuned Hybrid (Highly Accurate)")
         with st.spinner("Decompiling deep structural artifact signatures..."):
-            # Matches exact multi-scale antialiased bilinear resize configuration from Kaggle Cell 2
             v3_resized = tf.image.resize(img_tensor, [256, 256], method="bilinear", antialias=True)
             v3_resized = tf.clip_by_value(v3_resized, 0.0, 255.0)
             v3_batch = tf.expand_dims(v3_resized, axis=0)
             
-            # Bulletproof layer-name checking strategy to ensure no runtime typos
-            v3_gap_layers = [l for l in v3_eff.layers if "pooling" in l.name or "gap" in l.name]
+            # Fixed variable loops to eliminate typos
+            v3_gap_layers = [x for x in v3_eff.layers if "pooling" in x.name or "gap" in x.name]
             v3_extractor = tf.keras.Model(v3_eff.input, [v3_eff.output, v3_gap_layers[-1].output])
             
             v3_eff_p, v3_features = v3_extractor.predict(v3_batch, verbose=0)
