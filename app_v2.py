@@ -100,7 +100,7 @@ if uploaded_file is not None:
             v2_resized = tf.image.resize(img_tensor, [256, 256]) 
             v2_batch = tf.expand_dims(v2_resized, axis=0)
             
-            v2_gap = [l for l in v2_eff.layers if isinstance(l, tf.keras.layers.GlobalAveragePooling2D)]
+            v2_gap = [l for l in v2_eff.layers if type(l) == tf.keras.layers.GlobalAveragePooling2D]
             v2_extractor = tf.keras.Model(v2_eff.input, [v2_eff.output, v2_gap.output])
             
             v2_eff_p, v2_features = v2_extractor.predict(v2_batch, verbose=0)
@@ -128,7 +128,7 @@ if uploaded_file is not None:
             v3_resized = tf.clip_by_value(v3_resized, 0.0, 255.0)
             v3_batch = tf.expand_dims(v3_resized, axis=0)
             
-            v3_gap = [l for l in v3_eff.layers if isinstance(l, tf.keras.layers.GlobalAveragePooling2D)]
+            v3_gap = [l for l in v3_eff.layers if type(l) == tf.keras.layers.GlobalAveragePooling2D]
             v3_extractor = tf.keras.Model(v3_eff.input, [v3_eff.output, v3_gap.output])
             
             v3_eff_p, v3_features = v3_extractor.predict(v3_batch, verbose=0)
