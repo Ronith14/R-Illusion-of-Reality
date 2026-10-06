@@ -1,0 +1,6 @@
+{
+    "efficientnet_weight": 0.4,
+    "dnn_weight": 0.6,
+    "threshold": 0.6,
+    "selected_by": "validation balanced accuracy"
+}
