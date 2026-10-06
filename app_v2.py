@@ -58,7 +58,7 @@ def load_project_models():
     if not os.path.exists(MODEL_DIR):
         os.makedirs(MODEL_DIR)
         
-    expected_files = ["model_v2.h5", "model_v3.h5"] 
+    expected_files = ["efficientnet_v3_best.keras", "dnn_v3_final.keras"] 
     files_exist = all(os.path.exists(os.path.join(MODEL_DIR, f)) for f in expected_files)
     
     if not files_exist:
@@ -77,7 +77,7 @@ def load_project_models():
                     os.remove(ZIP_PATH)
                     st.toast("⚡ EfficientNet-B0 + DNN feature weights ready!", icon="🛡️")
                 else:
-                    st.error("Failed to download models. Please verify Google Drive file sharing status.")
+                    st.error("Failed to download models automatically. Please place your downloaded Kaggle files manually into the 'models' folder.")
             except Exception as e:
                 st.error(f"Workspace Activation Error: {str(e)}")
 
@@ -128,23 +128,22 @@ if uploaded_file is not None:
                 try:
                     import tensorflow as tf
                     
-                    # Map dropdown selection to the correct local file path
+                    # Exact Kaggle mapped filenames assigned dynamically based on user dropdown selection
                     model_mapping = {
-                        "Model V2 (Multi-Generator Dataset)": "model_v2.h5",
-                        "Model V3 (Enhanced Generalization)": "model_v3.h5"
+                        "Model V2 (Multi-Generator Dataset)": "efficientnet_v3_best.keras",
+                        "Model V3 (Enhanced Generalization)": "dnn_v3_final.keras"
                     }
                     target_model_file = model_mapping[selected_version]
                     model_path = os.path.join(MODEL_DIR, target_model_file)
                     
                     # Ensure file exists before attempting to load
                     if not os.path.exists(model_path):
-                        st.error(f"❌ Model file `{target_model_file}` not found in the `models/` folder. Please verify unzip step.")
+                        st.error(f"❌ Model file `{target_model_file}` not found in the `models/` folder. Please download it from Kaggle and place it inside the `models/` directory.")
                     else:
                         # Load actual trained Keras weights (compile=False bypasses optimizer conflicts)
                         model = tf.keras.models.load_model(model_path, compile=False)
                         
                         # Process image data into standard tensor format
-                        # Convert grayscale to RGB if user uploads monochrome
                         if resized_img.mode != "RGB":
                             resized_img = resized_img.convert("RGB")
                             
@@ -154,13 +153,13 @@ if uploaded_file is not None:
                         
                         # Execute real model inference logic
                         prediction = model.predict(img_array)
-                        raw_score = float(prediction[0][0])
+                        raw_score = float(prediction)
                         
                         # Interface Output decisions
                         st.markdown('<div class="metric-box">', unsafe_allow_html=True)
                         st.markdown("#### Final Classification Verdict")
                         
-                        # Default setting assumes values closer to 1 indicate an AI-Generated matrix
+                        # Assuming values closer to 1 indicate an AI-Generated matrix
                         if raw_score > 0.5:
                             confidence_percentage = f"{raw_score * 100:.2f}%"
                             st.markdown('Result: <span class="verdict-ai">AI-GENERATED</span>', unsafe_allow_html=True)
@@ -171,10 +170,10 @@ if uploaded_file is not None:
                             st.metric(label="Classifier Detection Confidence", value=confidence_percentage, delta="Authentic Spectrum Match")
                         st.markdown('</div>', unsafe_allow_html=True)
                         
-                        # Expandable live log display matrix
+                        # Live structural log display matrix
                         with st.expander("🛠️ View Latent Feature Extractor Matrix"):
                             st.json({
-                                "input_resolution": f"{image.size[0]}x{image.size[1]}",
+                                "input_resolution": f"{image.size}x{image.size}",
                                 "processed_tensor_shape": str(img_array.shape),
                                 "efficientnet_feature_vector_dimension": 1280,
                                 "raw_prediction_scalar": raw_score,
