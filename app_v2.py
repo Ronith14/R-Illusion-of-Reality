@@ -5,7 +5,7 @@ import requests
 from PIL import Image
 import numpy as np
 
-# 1. Page Configuration & Professional Theme Injection
+# 1. Page Configuration & Theme Injection
 st.set_page_config(
     page_title="Illusion of Reality Workspace",
     page_icon="🔮",
@@ -13,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for a stunning project center aesthetic
+# Custom CSS for dark-tech presentation aesthetic
 st.markdown("""
     <style>
     .main-title {
@@ -47,7 +47,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 2. Workspace Initialization & Fixed Drive Downloader
+# 2. Workspace Initialization & Drive Downloader
 DRIVE_FILE_ID = "1yGaE_P2-X2LdJxHQ3M7YRfRxd-zIKRtV" 
 MODEL_DIR = "models"
 ZIP_PATH = os.path.join(MODEL_DIR, "kag_models.zip")
@@ -100,7 +100,7 @@ with st.sidebar:
     st.markdown("### Engine Architecture")
     st.code("Input Size: 256x256\nBackbone: EfficientNet-B0\nClassifier: Custom DNN\nFusion: Weighted Threshold")
 
-# 4. Main Core Dashboard Content
+# 4. Main Dashboard UI Content
 st.markdown('<div class="main-title">🔮 The Illusion of Reality</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-title">Hybrid Deep Learning Framework for Multi-Generator AI Image Detection</div>', unsafe_allow_html=True)
 
@@ -116,6 +116,7 @@ if uploaded_file is not None:
         image = Image.open(uploaded_file)
         st.image(image, caption="Uploaded Input Stream", use_container_width=True)
         
+        # Preprocessing matching your 256x256 pipeline layout rules
         resized_img = image.resize((256, 256))
         
     with col2:
@@ -123,26 +124,67 @@ if uploaded_file is not None:
         execute = st.button("⚡ Run Hybrid Inference Analysis", type="primary")
         
         if execute:
-            with st.spinner("Processing features..."):
-                st.markdown('<div class="metric-box">', unsafe_allow_html=True)
-                st.markdown("#### Final Classification Verdict")
-                
-                is_ai_generated = True 
-                if is_ai_generated:
-                    st.markdown('Result: <span class="verdict-ai">AI-GENERATED</span>', unsafe_allow_html=True)
-                    st.metric(label="Classifier Detection Confidence", value="97.33%", delta="FLUX.1 Matrix Match")
-                else:
-                    st.markdown('Result: <span class="verdict-real">REAL HISTOGRAM</span>', unsafe_allow_html=True)
-                    st.metric(label="Classifier Detection Confidence", value="94.79%", delta="Authentic Spectrum")
-                st.markdown('</div>', unsafe_allow_html=True)
-                
-                with st.expander("🛠️ View Latent Feature Extractor Matrix"):
-                    st.json({
-                        "input_resolution": f"{image.size[0]}x{image.size[1]}",
-                        "processed_tensor_shape": "256x256x3",
-                        "efficientnet_feature_vector_dimension": 1280,
-                        "fusion_threshold_selected": 0.54,
-                        "supported_generators_evaluated": ["SD 1.5", "SDXL", "FLUX.1-schnell", "Kandinsky 2.2", "PixArt-Σ", "Würstchen"]
-                    })
+            with st.spinner("🔮 Processing latent feature vectors through EfficientNet-B0 + DNN..."):
+                try:
+                    import tensorflow as tf
+                    
+                    # Map dropdown selection to the correct local file path
+                    model_mapping = {
+                        "Model V2 (Multi-Generator Dataset)": "model_v2.h5",
+                        "Model V3 (Enhanced Generalization)": "model_v3.h5"
+                    }
+                    target_model_file = model_mapping[selected_version]
+                    model_path = os.path.join(MODEL_DIR, target_model_file)
+                    
+                    # Ensure file exists before attempting to load
+                    if not os.path.exists(model_path):
+                        st.error(f"❌ Model file `{target_model_file}` not found in the `models/` folder. Please verify unzip step.")
+                    else:
+                        # Load actual trained Keras weights (compile=False bypasses optimizer conflicts)
+                        model = tf.keras.models.load_model(model_path, compile=False)
+                        
+                        # Process image data into standard tensor format
+                        # Convert grayscale to RGB if user uploads monochrome
+                        if resized_img.mode != "RGB":
+                            resized_img = resized_img.convert("RGB")
+                            
+                        img_array = np.array(resized_img)
+                        img_array = np.expand_dims(img_array, axis=0)
+                        img_array = img_array / 255.0  # Normalize color channel vectors
+                        
+                        # Execute real model inference logic
+                        prediction = model.predict(img_array)
+                        raw_score = float(prediction[0][0])
+                        
+                        # Interface Output decisions
+                        st.markdown('<div class="metric-box">', unsafe_allow_html=True)
+                        st.markdown("#### Final Classification Verdict")
+                        
+                        # Default setting assumes values closer to 1 indicate an AI-Generated matrix
+                        if raw_score > 0.5:
+                            confidence_percentage = f"{raw_score * 100:.2f}%"
+                            st.markdown('Result: <span class="verdict-ai">AI-GENERATED</span>', unsafe_allow_html=True)
+                            st.metric(label="Classifier Detection Confidence", value=confidence_percentage, delta="Generative Artifact Matrix Match")
+                        else:
+                            confidence_percentage = f"{(1 - raw_score) * 100:.2f}%"
+                            st.markdown('Result: <span class="verdict-real">REAL HISTOGRAM</span>', unsafe_allow_html=True)
+                            st.metric(label="Classifier Detection Confidence", value=confidence_percentage, delta="Authentic Spectrum Match")
+                        st.markdown('</div>', unsafe_allow_html=True)
+                        
+                        # Expandable live log display matrix
+                        with st.expander("🛠️ View Latent Feature Extractor Matrix"):
+                            st.json({
+                                "input_resolution": f"{image.size[0]}x{image.size[1]}",
+                                "processed_tensor_shape": str(img_array.shape),
+                                "efficientnet_feature_vector_dimension": 1280,
+                                "raw_prediction_scalar": raw_score,
+                                "active_model_binary": target_model_file,
+                                "supported_generators_evaluated": ["SD 1.5", "SDXL", "FLUX.1-schnell", "Kandinsky 2.2", "PixArt-Σ", "Würstchen"]
+                            })
+                            
+                except ModuleNotFoundError:
+                    st.error("❌ TensorFlow library is missing! Run `pip install tensorflow` in your terminal environment to handle predictions.")
+                except Exception as e:
+                    st.error(f"❌ Structural error handling matrix arrays: {str(e)}")
 else:
     st.info("💡 Awaiting visual media vector payload upload to activate execution pipeline components.")
